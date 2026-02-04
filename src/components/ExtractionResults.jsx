@@ -71,7 +71,7 @@ function ExtractionResults({ results }) {
     const [activeTab, setActiveTab] = useState('page1')
 
     const formatValue = (value) => {
-        if (!value) return <span className="field-value empty">Not found</span>
+        if (!value) return <span className="field-value">0</span>
         // Strip non-digits to show raw numbers without formatting
         const cleaned = value.toString().replace(/[$,]/g, '').split('.')[0]
         return <span className="field-value">{cleaned}</span>
