@@ -96,15 +96,9 @@ function App() {
                                     Processing...
                                 </>
                             ) : (
-                                '🔍 Extract Data'
+                                'Extract Data'
                             )}
                         </button>
-
-                        {(file || results) && (
-                            <button className="btn btn-secondary" onClick={handleReset}>
-                                🔄 Reset
-                            </button>
-                        )}
                     </div>
 
                     {isLoading && (

@@ -72,12 +72,9 @@ function ExtractionResults({ results }) {
 
     const formatValue = (value) => {
         if (!value) return <span className="field-value empty">Not found</span>
-        // Format numbers with commas
-        if (/^\d+$/.test(value.replace(/,/g, ''))) {
-            const num = parseInt(value.replace(/,/g, ''), 10)
-            return <span className="field-value">${num.toLocaleString()}</span>
-        }
-        return <span className="field-value">{value}</span>
+        // Strip non-digits to show raw numbers without formatting
+        const cleaned = value.toString().replace(/[$,]/g, '').split('.')[0]
+        return <span className="field-value">{cleaned}</span>
     }
 
     const getFieldsForTab = () => {
@@ -112,7 +109,8 @@ function ExtractionResults({ results }) {
         const headers = ['Field', 'Value']
         const rows = allFields.map((field) => [
             field.label,
-            allData[field.key] || '',
+            // Clean value for CSV as well
+            (allData[field.key] || '').toString().replace(/[$,]/g, '').split('.')[0],
         ])
 
         const csvContent = [
@@ -141,20 +139,6 @@ function ExtractionResults({ results }) {
                     </p>
                 </div>
                 <div className="results-meta">
-                    <span className="extraction-method">
-                        {results.extraction_method === 'pdfplumber' ? '📄 Text' :
-                            results.extraction_method === 'hybrid' ? '🔄 Hybrid' : '🔍 OCR'}
-                    </span>
-                    {results.confidence_score !== null && results.confidence_score !== undefined && (
-                        <span className="extraction-method" style={{
-                            background: results.confidence_score > 0.7 ? 'rgba(16, 185, 129, 0.2)' :
-                                results.confidence_score > 0.4 ? 'rgba(234, 179, 8, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                            color: results.confidence_score > 0.7 ? 'var(--accent-emerald)' :
-                                results.confidence_score > 0.4 ? 'var(--accent-amber)' : 'var(--error)'
-                        }}>
-                            📊 {Math.round(results.confidence_score * 100)}% Confidence
-                        </span>
-                    )}
                     <div className="export-buttons">
                         <button className="btn btn-secondary btn-export" onClick={handleExportJSON}>
                             📥 JSON
