@@ -71,9 +71,12 @@ function ExtractionResults({ results }) {
     const [activeTab, setActiveTab] = useState('page1')
 
     const formatValue = (value) => {
-        if (!value) return <span className="field-value">0</span>
+        // Handle V2 API structure {value: "...", confidence: ...}
+        const actualValue = value && typeof value === 'object' && 'value' in value ? value.value : value
+
+        if (!actualValue) return <span className="field-value">0</span>
         // Strip non-digits to show raw numbers without formatting
-        const cleaned = value.toString().replace(/[$,]/g, '').split('.')[0]
+        const cleaned = actualValue.toString().replace(/[$,]/g, '').split('.')[0]
         return <span className="field-value">{cleaned}</span>
     }
 
@@ -110,7 +113,11 @@ function ExtractionResults({ results }) {
         const rows = allFields.map((field) => [
             field.label,
             // Clean value for CSV as well
-            (allData[field.key] || '').toString().replace(/[$,]/g, '').split('.')[0],
+            (() => {
+                const val = allData[field.key]
+                const actualVal = val && typeof val === 'object' && 'value' in val ? val.value : val
+                return (actualVal || '').toString().replace(/[$,]/g, '').split('.')[0]
+            })(),
         ])
 
         const csvContent = [
