@@ -29,10 +29,10 @@ function App() {
         const formData = new FormData()
         formData.append('file', file)
 
-        const API_URL = import.meta.env.VITE_API_URL || 'https://web-production-ba227.up.railway.app'
+        const API_URL = import.meta.env.VITE_API_URL
 
         try {
-            const response = await fetch(`${API_URL}/api/extract`, {
+            const response = await fetch(`${API_URL}/api/extract/v2`, {
                 method: 'POST',
                 body: formData,
             })
@@ -43,8 +43,16 @@ function App() {
                 throw new Error(data.detail || 'Failed to extract data from PDF')
             }
 
-            if (data.success) {
+            // V2 API returns success=false for low confidence, but still returns data
+            if (data.success || (data.data && Object.keys(data.data).length > 0)) {
                 setResults(data.data)
+
+                // If it's a "manual review" case (success=false but data exists), we might want to show a gentle warning
+                // but the user asked to hide confidence things, so we'll just treat it as a result.
+                // Optionally we could set a non-intrusive "review needed" banner if requested, 
+                // but strictly "dont show confidence related things" implies clean UI.
+                // We'll reset error just in case.
+                setError(null)
             } else {
                 throw new Error(data.message || 'Extraction failed')
             }
